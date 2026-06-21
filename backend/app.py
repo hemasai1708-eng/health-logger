@@ -8,7 +8,10 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
+#DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
+#os.makedirs(DATA_DIR, exist_ok=True)
+
+DATA_DIR = '/data' if os.path.exists('/data') else os.path.join(os.path.dirname(__file__), '..', 'data')
 os.makedirs(DATA_DIR, exist_ok=True)
 
 WORKOUTS_CSV = os.path.join(DATA_DIR, 'workouts.csv')

@@ -1,4 +1,5 @@
-const API = 'http://127.0.0.1:5000/api';
+//const API = 'http://127.0.0.1:5000/api';
+const API = window.location.port === '3000' ? 'http://127.0.0.1:5000/api' : '/api';
 const today = () => new Date().toISOString().slice(0, 10);
 
 // ── Chart instances ──────────────────────────────────────────────────
