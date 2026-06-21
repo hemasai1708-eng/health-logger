@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VitalLog — Health & Fitness Tracker</title>
+  <link rel="stylesheet" href="static/css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">
+      <span class="logo-mark">V</span>
+      <span class="logo-text">VitalLog</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-tab="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="nav-btn" data-tab="workouts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 4v16M18 4v16M6 12h12M3 6h3M18 6h3M3 18h3M18 18h3"/></svg>
+        Workouts
+      </button>
+      <button class="nav-btn" data-tab="nutrition">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/><path d="M12 6v6l4 2"/></svg>
+        Nutrition
+      </button>
+      <button class="nav-btn" data-tab="sleep">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        Sleep
+      </button>
+      <button class="nav-btn" data-tab="weight">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3a4 4 0 014 4H8a4 4 0 014-4z"/><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 11h8M8 15h4"/></svg>
+        Weight
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <span>CSV-backed · Pandas + NumPy</span>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+    <!-- ── DASHBOARD ──────────────────────────────────────────────── -->
+    <section id="tab-dashboard" class="tab active">
+      <header class="page-header">
+        <div>
+          <h1>Good morning 👋</h1>
+          <p class="subtitle">Here's your health overview</p>
+        </div>
+        <button class="btn btn-primary" onclick="loadStats()">Refresh stats</button>
+      </header>
+
+      <div class="stat-grid" id="stat-cards">
+        <div class="stat-card loading"><span>Loading…</span></div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Workout calories burned</h3>
+          <canvas id="workoutChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Sleep hours</h3>
+          <canvas id="sleepChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Daily nutrition (calories)</h3>
+          <canvas id="nutritionChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>Weight trend (kg)</h3>
+          <canvas id="weightChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── WORKOUTS ───────────────────────────────────────────────── -->
+    <section id="tab-workouts" class="tab">
+      <header class="page-header">
+        <div><h1>Workouts</h1><p class="subtitle">Log and track your training sessions</p></div>
+        <button class="btn btn-primary" onclick="openModal('modal-workout')">+ Add workout</button>
+      </header>
+      <div class="table-wrap">
+        <table class="data-table" id="workouts-table">
+          <thead><tr><th>Date</th><th>Type</th><th>Duration (min)</th><th>Calories</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="workouts-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── NUTRITION ──────────────────────────────────────────────── -->
+    <section id="tab-nutrition" class="tab">
+      <header class="page-header">
+        <div><h1>Nutrition</h1><p class="subtitle">Track your meals and macros</p></div>
+        <button class="btn btn-primary" onclick="openModal('modal-nutrition')">+ Log meal</button>
+      </header>
+      <div class="table-wrap">
+        <table class="data-table" id="nutrition-table">
+          <thead><tr><th>Date</th><th>Meal</th><th>Calories</th><th>Protein (g)</th><th>Carbs (g)</th><th>Fat (g)</th><th></th></tr></thead>
+          <tbody id="nutrition-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── SLEEP ──────────────────────────────────────────────────── -->
+    <section id="tab-sleep" class="tab">
+      <header class="page-header">
+        <div><h1>Sleep</h1><p class="subtitle">Monitor your rest and recovery</p></div>
+        <button class="btn btn-primary" onclick="openModal('modal-sleep')">+ Log sleep</button>
+      </header>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Hours</th><th>bed-time</th><th>Quality</th><th>Notes</th><th></th></tr></thead>
+          <tbody id="sleep-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ── WEIGHT ─────────────────────────────────────────────────── -->
+    <section id="tab-weight" class="tab">
+      <header class="page-header">
+        <div><h1>Weight</h1><p class="subtitle">Track your body composition progress</p></div>
+        <button class="btn btn-primary" onclick="openModal('modal-weight')">+ Log weight</button>
+      </header>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Weight (kg)</th><th>BMI</th><th></th></tr></thead>
+          <tbody id="weight-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- ── MODALS ─────────────────────────────────────────────────────── -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeAllModals()"></div>
+
+  <!-- Workout modal -->
+  <div class="modal" id="modal-workout">
+    <div class="modal-header"><h2>Log workout</h2><button class="modal-close" onclick="closeAllModals()">×</button></div>
+    <div class="form-group"><label>Date</label><input type="date" id="w-date" /></div>
+    <div class="form-group">
+      <label>Workout type</label>
+      <select id="w-type">
+        <option>Running</option><option>Cycling</option><option>Swimming</option>
+        <option>Weight Training</option><option>Yoga</option><option>HIIT</option>
+        <option>Walking</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Duration (min)</label><input type="number" id="w-duration" placeholder="45" /></div>
+      <div class="form-group"><label>Calories burned</label><input type="number" id="w-calories" placeholder="350" /></div>
+    </div>
+    <div class="form-group"><label>Notes</label><input type="text" id="w-notes" placeholder="Felt strong today…" /></div>
+    <button class="btn btn-primary btn-full" onclick="saveWorkout()">Save workout</button>
+  </div>
+
+  <!-- Nutrition modal -->
+  <div class="modal" id="modal-nutrition">
+    <div class="modal-header"><h2>Log meal</h2><button class="modal-close" onclick="closeAllModals()">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label>Date</label><input type="date" id="n-date" /></div>
+      <div class="form-group"><label>Meal</label>
+        <select id="n-meal"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snack</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label>Calories</label><input type="number" id="n-calories" placeholder="500" /></div>
+    <div class="form-row">
+      <div class="form-group"><label>Protein (g)</label><input type="number" id="n-protein" placeholder="30" /></div>
+      <div class="form-group"><label>Carbs (g)</label><input type="number" id="n-carbs" placeholder="60" /></div>
+      <div class="form-group"><label>Fat (g)</label><input type="number" id="n-fat" placeholder="15" /></div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="saveNutrition()">Save meal</button>
+  </div>
+
+  <!-- Sleep modal -->
+  <div class="modal" id="modal-sleep">
+    <div class="modal-header"><h2>Log sleep</h2><button class="modal-close" onclick="closeAllModals()">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label>Date</label><input type="date" id="s-date" /></div>
+      <div class="form-group"><label>Hours slept</label><input type="number" id="s-hours" step="0.5" placeholder="7.5" /></div>
+    </div>
+    <div class="form-group"><label>Bed time</label><input type="time" id="s-bedtime"/></div>
+    <div class="form-group"><label>Sleep quality</label>
+      <select id="s-quality"><option>Excellent</option><option>Good</option><option>Fair</option><option>Poor</option></select>
+    </div>
+    <div class="form-group"><label>Notes</label><input type="text" id="s-notes" placeholder="Woke up once…" /></div>
+    <button class="btn btn-primary btn-full" onclick="saveSleep()">Save sleep</button>
+  </div>
+
+  <!-- Weight modal -->
+  <div class="modal" id="modal-weight">
+    <div class="modal-header"><h2>Log weight</h2><button class="modal-close" onclick="closeAllModals()">×</button></div>
+    <div class="form-row">
+      <div class="form-group"><label>Date</label><input type="date" id="wt-date" /></div>
+      <div class="form-group"><label>Weight (kg)</label><input type="number" id="wt-weight" step="0.1" placeholder="72.5" /></div>
+    </div>
+    <div class="form-group"><label>Height (m) — used for BMI</label><input type="number" id="wt-height" step="0.01" placeholder="1.72" /></div>
+    <button class="btn btn-primary btn-full" onclick="saveWeight()">Save weight</button>
+  </div>
+
+  <script src="static/js/app.js"></script>
+</body>
+</html>
